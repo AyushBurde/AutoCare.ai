@@ -1,70 +1,82 @@
-# 🚗 Kritagya Automotive - Backend & Intelligence Layer
+# 🚗 AutoCare.ai - Predictive Maintenance System
 
-This repository contains the **Machine Learning Core** and **Backend API** for the Kritagya Predictive Maintenance System.
-
-### ✅ What is completed?
-1.  **Telematics Data Generator** (`generate_data.py`):
-    * Creates a synthetic dataset of 10 vehicles.
-    * Simulates "Cooling Pump Failure" patterns (Rising Temp + Dropping Pressure).
-2.  **ML Model** (`train_model.py`):
-    * Uses a **Random Forest Classifier** to detect failures.
-    * Includes Feature Engineering (3-Hour Moving Averages) for stability.
-    * Saves the trained "Brain" as `failure_predictor.pkl`.
-3.  **Backend API** (`main.py`):
-    * Built with **FastAPI**.
-    * Exposes endpoints for the React Frontend to get real-time predictions.
+**AutoCare.ai** is an intelligent predictive maintenance platform for vehicle fleets. It combines Machine Learning (Random Forest) for failure prediction with a Modern React Dashboard and Voice AI (Vapi.ai) for proactive customer engagement.
 
 ---
 
-### ⚙️ How to Setup (For Daksh)
+## 🏗️ Project Architecture
 
-1.  **Clone the Repo**
-  
+The system consists of two main components:
 
-2.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
+1.  **Backend (Python/FastAPI)**:
+    *   **ML Model**: Random Forest Classifier (`failure_predictor.pkl`) trained on synthetic telematics data.
+    *   **API**: Exposes endpoints (`/predict`, `/insights`) for the frontend.
+    *   **Data Generation**: Simulates realistic sensor data (Engine Temp, Oil Pressure, Vibration).
 
-3.  **Initialize the System** (Run these in order)
-    ```bash
-    python vehicle_data.py  # Generates the CSV
-    python train_model.py    # Trains and saves the .pkl model
-    ```
-
-4.  **Start the Server**
-    ```bash
-    python main.py
-    ```
-    * Server will run at: `http://localhost:8000`
-    * Test Interface: `http://localhost:8000/docs`
+2.  **Frontend (React + Vite + Tailwind)**:
+    *   **Fleet Dashboard**: Real-time monitoring of vehicle health (Green/Red status).
+    *   **Vehicle Detail**: Interactive charts (Recharts) and AI Diagnostics.
+    *   **Voice Agent**: Integrated **Vapi.ai** to call customers automatically when critical failures are predicted.
+    *   **Manufacturing Insights**: Feedback loop for quality improvements.
 
 ---
 
-### 🔌 API Endpoints for Frontend
+## 🚀 Quick Start Guide
 
-**1. Predict Failure Risk**
-* **Endpoint:** `POST /predict`
-* **Input (JSON):**
-    ```json
-    {
-      "engine_temp_c": 105.5,
-      "oil_pressure_psi": 25.0,
-      "vibration_hz": 45.0,
-      "rpm": 2200,
-      "temp_ma_3h": 104.0,
-      "pressure_ma_3h": 26.0,
-      "vib_ma_3h": 44.0
-    }
-    ```
-* **Response:** Returns `failure_risk_score` (0-100%) and `alert_level`.
+### Prerequisites
+*   Python 3.8+
+*   Node.js 16+
 
-**2. Manufacturing Insights**
-* **Endpoint:** `GET /insights`
-* **Response:** Returns RCA data and recommendations for the "Quality Loop" slide.
+### 1. Backend Setup (The Brain)
+Open a terminal in the `backend/` directory:
+
+```bash
+cd backend
+pip install -r requirements.txt
+
+# Initialize System (Generate Data & Train Model)
+python vechicle_data.py
+python train_model.py
+
+# Start API Server
+python main.py
+```
+*Server runs at: `http://localhost:8000`*
+
+### 2. Frontend Setup (The Interface)
+Open a **new** terminal in the `frontend/` directory:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*Dashboard runs at: `http://localhost:5173`*
 
 ---
 
-### 🚀 Next Steps (Frontend)
-* Build the Dashboard using the data from `/predict`.
-* Trigger a "Red Alert" UI when `alert_level` is "CRITICAL".
+## 🔑 Configuration (Voice AI)
+
+The frontend uses **Vapi.ai** for the "Call Owner" feature.
+The API Keys are configured in `frontend/.env`:
+
+```env
+VITE_VAPI_PUBLIC_KEY=your_public_key
+VITE_VAPI_ASSISTANT_ID=your_assistant_id
+```
+
+---
+
+## 📱 Application Flow (Demo Script)
+
+1.  **Fleet Overview**: Open the dashboard. Notice **MH-12-AB-1000** is CRITICAL (Red).
+2.  **Drill Down**: Click on the red car to view details.
+3.  **Run Diagnostics**: Click "Run AI Analysis". The ML model predicts **98% Risk** of Cooling Pump failure.
+4.  **Take Action**: Click "Contact Customer (AI)". This triggers a voice call to the owner explaining the issue and booking an appointment.
+5.  **Quality Loop**: Navigate to "Manufacturing Intelligence" to see how this data helps engineering (e.g., "Upgrade to Viton Seals").
+
+---
+
+## 🛠️ Tech Stack
+*   **Frontend**: React, Vite, Tailwind CSS, Recharts, Lucide Icons, Vapi Web SDK
+*   **Backend**: Python, FastAPI, Scikit-learn, Pandas, Uvicorn
