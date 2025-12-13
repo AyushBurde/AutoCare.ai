@@ -27,4 +27,24 @@ export const getInsights = async () => {
     }
 };
 
+export const getScheduleSlots = async () => {
+    try {
+        const response = await api.get('/api/schedule/slots');
+        return response.data;
+    } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+    }
+};
+
+export const bookAppointment = async (bookingData) => {
+    try {
+        const response = await api.post('/api/schedule/book', bookingData);
+        return response.data;
+    } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+    }
+};
+
 export default api;

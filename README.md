@@ -70,10 +70,16 @@ VITE_VAPI_ASSISTANT_ID=your_assistant_id
 ## 📱 Application Flow (Demo Script)
 
 1.  **Fleet Overview**: Open the dashboard. Notice **MH-12-AB-1000** is CRITICAL (Red).
-2.  **Drill Down**: Click on the red car to view details.
-3.  **Run Diagnostics**: Click "Run AI Analysis". The ML model predicts **98% Risk** of Cooling Pump failure.
-4.  **Take Action**: Click "Contact Customer (AI)". This triggers a voice call to the owner explaining the issue and booking an appointment.
-5.  **Quality Loop**: Navigate to "Manufacturing Intelligence" to see how this data helps engineering (e.g., "Upgrade to Viton Seals").
+2.  **Drill Down**: Click on the red car to view the **Compact Command Center**.
+3.  **Run Diagnostics**: Click "Run AI Diagnostics". The ML model predicts **98% Risk** of Cooling Pump failure.
+4.  **Priority Action**: The "Priority Service Action" card appears instantly.
+    *   Click **"Book Priority Service"**.
+    *   Select a slot (e.g., "Tomorrow 10:00 AM").
+    *   Receive a unique **Job Card ID** (e.g., SRV-4821).
+5.  **Voice Agent Intercept**: Click "Contact Customer (AI)" to simulate the voice agent calling the owner.
+6.  **Closed Loop**: Go back to Dashboard -> Click **"Manufacturing Insights"** button.
+    *   View the "Professional Engineering Dashboard".
+    *   See the root cause analysis (Hot Zone Failure) and approve the **Engineering Change Order (ECO)**.
 
 ---
 
