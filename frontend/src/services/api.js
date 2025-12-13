@@ -19,7 +19,7 @@ export const predictFailure = async (data) => {
 
 export const getInsights = async () => {
     try {
-        const response = await api.get('/insights');
+        const response = await api.get('/api/insights');
         return response.data;
     } catch (error) {
         console.error("API Error:", error);
