@@ -33,6 +33,13 @@ export default function FleetDashboard() {
                     <p className="text-slate-400 pl-14">Real-time predictive maintenance dashboard</p>
                 </div>
                 <div className="flex gap-4">
+                    <button
+                        onClick={() => navigate('/insights')}
+                        className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-xl font-bold text-slate-900 hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/20 transition-all flex items-center gap-2"
+                    >
+                        <AlertTriangle size={20} />
+                        Manufacturing Insights
+                    </button>
                     <div className="glass-card px-6 py-3 rounded-xl flex items-center gap-3">
                         <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
                         <span className="text-slate-300 font-medium">System Online</span>
