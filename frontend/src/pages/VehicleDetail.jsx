@@ -45,7 +45,18 @@ export default function VehicleDetail() {
 
     const handleCallOwner = () => {
         setCallStatus('calling');
-        vapi.start(import.meta.env.VITE_VAPI_ASSISTANT_ID)
+        // Pass context so the agent "sees" the data
+        const assistantOverrides = {
+            variableValues: {
+                ownerName: "Rajesh Sharma",
+                vehicleModel: "Honda City 2022",
+                riskScore: prediction?.failure_risk_score || "Unknown",
+                failedComponent: "Cooling Pump",
+                failureTime: "10 Days"
+            }
+        };
+
+        vapi.start(import.meta.env.VITE_VAPI_ASSISTANT_ID, assistantOverrides)
             .then(() => setCallStatus('active'))
             .catch(err => {
                 console.error("Vapi Error:", err);
