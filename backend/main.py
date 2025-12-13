@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 import uvicorn
 import random
+from datetime import datetime, timedelta
 
 # 1. Initialize API
 app = FastAPI(title="Kritagya Backend API")
@@ -153,6 +154,67 @@ def generate_insights():
         }
     }
 
+# --- TASK A3: SCHEDULING AGENT (Two-Way Communication Simulation) ---
+
+# 1. The Input Model (What we need to book a slot)
+class BookingRequest(BaseModel):
+    vehicle_id: str
+    slot: str
+    owner_name: str
+
+# 2. ENDPOINT 1: "The Query" (Checking Availability)
+# The Voice Agent calls this to ask: "What are the official open slots?"
+@app.get("/api/schedule/slots")
+def get_available_slots():
+    """
+    Simulates querying the Hero MotoCorp DMS for open bays.
+    We prioritize 'Official Hubs' over local garages for quality assurance.
+    """
+    # Logic: Get the current time and jump forward 24 hours
+    # This ensures the demo is always relevant to "Tomorrow"
+    tomorrow = datetime.now() + timedelta(days=1)
+    day_after = datetime.now() + timedelta(days=2)
+    
+    # Format the date nicely (e.g., "Saturday, 14 Dec")
+    date_format = "%A, %d %b"
+    
+    # We return a structured response simulating the DMS reply
+    return {
+        "status": "success",
+        "recommended_center": {
+            "name": "Hero MotoCorp Authorized Hub - Malad",
+            "type": "OFFICIAL_DEALER", # Shows we prioritize official centers
+            "distance": "2.4 km"
+        },
+        "technician_available": "Rajesh (Certified Expert)",
+        "available_slots": [
+            f"{tomorrow.strftime(date_format)} at 10:00 AM",
+            f"{tomorrow.strftime(date_format)} at 02:00 PM",
+            f"{day_after.strftime(date_format)} at 11:00 AM"
+        ]
+    }
+
+# 3. ENDPOINT 2: "The Handshake" (Locking the Booking)
+# The Frontend/Voice Agent calls this when Mr. Sharma says "Yes".
+@app.post("/api/schedule/book")
+def book_appointment(booking: BookingRequest):
+    """
+    Simulates the 'Two-Way Handshake'.
+    1. We send the request to the Service Center.
+    2. They 'accept' it (simulated).
+    3. We generate a Job Card ID.
+    """
+    # Simulate generating a unique Job Card ID from the Dealer System
+    job_card_id = f"SRV-{random.randint(1000, 9999)}"
+    
+    return {
+        "status": "confirmed",
+        "job_card_id": job_card_id, # The "Ticket" you mentioned
+        "message": f"Appointment confirmed for {booking.owner_name}.",
+        "slot_locked": booking.slot,
+        "center": "Hero MotoCorp Malad",
+        "instructions": "Please bring your RC Book and Insurance copy."
+    }
 # Run Server (Standard Python way)
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
