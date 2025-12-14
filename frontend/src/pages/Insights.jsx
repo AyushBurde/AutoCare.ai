@@ -3,14 +3,32 @@ import { getInsights } from '../services/api';
 import {
     AlertTriangle,
     CheckCircle,
-    ArrowLeft,
     Activity,
     Thermometer,
-    Cpu,
     FileText,
-    Shield
+    Shield,
+    Cpu,
+    ArrowLeft,
+    Zap,
+    BarChart3,
+    History,
+    TrendingUp,
+    Database
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
+import GlassCard from '../components/ui/GlassCard';
+import NeonButton from '../components/ui/NeonButton';
+
+// Mock Historical Data (5 Years)
+const historicalData = [
+    { year: '2020', failures: 2, efficiency: 98 },
+    { year: '2021', failures: 3, efficiency: 95 },
+    { year: '2022', failures: 5, efficiency: 91 },
+    { year: '2023', failures: 12, efficiency: 84 },
+    { year: '2024', failures: 34, efficiency: 62 },
+];
 
 export default function Insights() {
     const [data, setData] = useState(null);
@@ -30,11 +48,9 @@ export default function Insights() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-2 border-slate-800 border-t-cyan-500 rounded-full animate-spin"></div>
-                    <p className="text-slate-500 font-mono text-sm tracking-widest uppercase animate-pulse">Initializing Analysis Module...</p>
-                </div>
+            <div className="flex flex-col items-center justify-center h-[80vh]">
+                <div className="w-16 h-16 border-4 border-slate-800 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
+                <p className="text-cyan-400 font-mono text-sm tracking-widest uppercase animate-pulse">Initializing Historical Database...</p>
             </div>
         );
     }
@@ -42,163 +58,180 @@ export default function Insights() {
     if (!data) return null;
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-200 font-sans p-6 md:p-8">
-            {/* Top Navigation Bar */}
-            <header className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800/60">
-                <div className="flex items-center gap-6">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="p-2 text-slate-500 hover:text-cyan-400 hover:bg-slate-900 rounded-lg transition-all"
-                    >
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-6 border-b border-slate-800/60">
+                <div className="flex items-center gap-4">
+                    <NeonButton variant="ghost" className="!p-2 md:hidden" onClick={() => navigate('/')}>
                         <ArrowLeft size={20} />
-                    </button>
+                    </NeonButton>
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-xl font-bold text-white tracking-wide">ENGINEERING INSIGHTS</h1>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/30 text-cyan-400 border border-cyan-900/50">
-                                LIVE STREAM
+                            <h1 className="text-2xl font-bold tracking-tight">Component Intelligence</h1>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-950/30 text-purple-400 border border-purple-900/50 flex items-center gap-2">
+                                <Database size={10} className="fill-purple-400" />
+                                HISTORICAL ARCHIVE
                             </span>
                         </div>
                         <p className="text-slate-500 text-xs font-mono mt-1">
-                            SYSTEM ID: <span className="text-slate-400">MQI-2024-X99</span> • REGION: <span className="text-slate-400">ASIA-PACIFIC</span>
+                            TARGET: <span className="text-white font-bold">{data.critical_component}</span> • TIMEFRAME: <span className="text-slate-400">2020-2025</span>
                         </p>
                     </div>
                 </div>
-                <div className="hidden md:flex items-center gap-4">
-                    <div className="text-right">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Session Active</p>
-                        <p className="text-xs text-emerald-500 font-mono">SECURE_CONNECTION_V2</p>
-                    </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse"></div>
-                </div>
-            </header>
+                <NeonButton variant="outline" icon={BarChart3} className="!py-2 !px-4 !text-xs hidden sm:flex">
+                    Export Analysis
+                </NeonButton>
+            </div>
 
-            {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
+            {/* Main Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                {/* LEFT COLUMN: Status & Overview (30%) */}
+                {/* LEFT: Current Critical Status (4 Cols) */}
                 <div className="lg:col-span-4 space-y-6">
-                    {/* Critical Alert Card */}
-                    <div className="bg-slate-900/50 backdrop-blur-xl border border-red-500/30 rounded-2xl overflow-hidden relative group">
+                    <GlassCard className="group relative overflow-hidden !border-red-500/30" hoverEffect={true}>
                         <div className="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
-                        <div className="p-6 relative z-10">
-                            <div className="flex items-start justify-between mb-6">
-                                <div className="p-3 bg-red-500/20 text-red-500 rounded-xl border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.15)]">
-                                    <AlertTriangle size={28} />
-                                </div>
-                                <span className="px-3 py-1 bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full animate-pulse shadow-lg shadow-red-500/40">
-                                    Critical Alert
-                                </span>
+
+                        <div className="flex items-center gap-3 mb-6 relative z-10">
+                            <div className="p-3 bg-red-500/20 text-red-500 rounded-xl border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.15)] animate-pulse-slow">
+                                <AlertTriangle size={24} />
                             </div>
-
-                            <h2 className="text-2xl font-bold text-white mb-2">{data.critical_component}</h2>
-                            <p className="text-red-400 text-sm font-mono mb-6">DEFECT_CODE: ERR_SEAL_FAIL_09</p>
-
-                            <div className="grid grid-cols-2 gap-4 border-t border-red-500/20 pt-6">
-                                <div>
-                                    <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Impacted Units</p>
-                                    <p className="text-2xl font-mono font-bold text-white">{data.total_failures_detected}</p>
-                                </div>
-                                <div>
-                                    <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1">Risk Level</p>
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="flex gap-0.5">
-                                            <div className="w-1.5 h-4 bg-red-500 rounded-sm"></div>
-                                            <div className="w-1.5 h-4 bg-red-500 rounded-sm"></div>
-                                            <div className="w-1.5 h-4 bg-red-500 rounded-sm"></div>
-                                            <div className="w-1.5 h-4 bg-red-900/50 rounded-sm"></div>
-                                        </div>
-                                        <span className="text-red-400 font-bold text-sm">HIGH</span>
-                                    </div>
-                                </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-white leading-none mb-1">Critical Failure Detected</h2>
+                                <p className="text-red-400 text-xs uppercase font-bold tracking-wider">Immediate Action Required</p>
                             </div>
                         </div>
-                        {/* Progress Bar at bottom */}
-                        <div className="h-1 bg-slate-800 w-full">
-                            <div className="h-full bg-red-500 w-[85%] shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-                        </div>
-                    </div>
 
-                    {/* Sensor Data / Tech Specs Mini-Cards */}
+                        <div className="relative z-10 space-y-4">
+                            <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800/50">
+                                <p className="text-slate-500 text-[10px] uppercase font-bold mb-1">Component ID</p>
+                                <p className="text-xl font-mono text-white">CP-774-X (Cooling Pump)</p>
+                            </div>
+                            <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800/50">
+                                <p className="text-slate-500 text-[10px] uppercase font-bold mb-1">Failure Signature</p>
+                                <p className="text-sm font-mono text-cyan-400">THERMAL_ELASTICITY_LOSS</p>
+                            </div>
+                        </div>
+
+                        {/* Visual Glitch Effect Decoration */}
+                        <div className="absolute bottom-0 right-0 p-4 opacity-20 pointer-events-none">
+                            <Activity size={120} className="text-red-500" />
+                        </div>
+                    </GlassCard>
+
+                    {/* Stats */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                            <Thermometer size={16} className="text-slate-500 mb-2" />
-                            <p className="text-xs text-slate-500 uppercase font-bold">Avg Temp</p>
-                            <p className="text-xl font-mono text-cyan-400">38.5°C</p>
-                        </div>
-                        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                            <Activity size={16} className="text-slate-500 mb-2" />
-                            <p className="text-xs text-slate-500 uppercase font-bold">Vibration</p>
-                            <p className="text-xl font-mono text-orange-400">124Hz</p>
-                        </div>
+                        <GlassCard className="!p-4 bg-slate-900/50 flex flex-col justify-center items-center text-center" hoverEffect={true}>
+                            <p className="text-4xl font-black text-white mb-1">5 <span className="text-sm font-medium text-slate-500">Years</span></p>
+                            <p className="text-[10px] text-slate-500 uppercase font-bold">Data Range</p>
+                        </GlassCard>
+                        <GlassCard className="!p-4 bg-slate-900/50 flex flex-col justify-center items-center text-center" hoverEffect={true}>
+                            <p className="text-4xl font-black text-red-500 mb-1">+480%</p>
+                            <p className="text-[10px] text-slate-500 uppercase font-bold">Failure Rate Incr.</p>
+                        </GlassCard>
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN: Detailed Analysis (70%) */}
+                {/* RIGHT: Historical Analysis Chart (8 Cols) */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
-
-                    {/* Technical Findings Panel */}
-                    <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 md:p-8 backdrop-blur-md">
-                        <div className="flex items-center gap-3 mb-6">
-                            <FileText size={20} className="text-cyan-500" />
-                            <h3 className="text-lg font-bold text-white">Technical Analysis Report</h3>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-xs font-mono text-slate-500 mb-1">PATTERN_RECOGNITION://RESULTS</p>
-                                    <p className="text-slate-300 leading-relaxed text-sm bg-slate-950/50 p-4 rounded-lg border border-slate-800/50">
-                                        <span className="text-cyan-400 font-mono text-xs block mb-2">[LOG_ENTRY_4402]</span>
-                                        {data.pattern_detected}
-                                    </p>
+                    <GlassCard className="flex-1 min-h-[400px] flex flex-col relative !overflow-visible">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                                    <History size={20} />
                                 </div>
-                                <div className="flex gap-2">
-                                    <span className="px-2 py-1 bg-slate-800 text-slate-400 text-[10px] font-mono rounded">ERR_RATE: 12%</span>
-                                    <span className="px-2 py-1 bg-slate-800 text-slate-400 text-[10px] font-mono rounded">CONFIDENCE: 99.8%</span>
-                                </div>
+                                <h3 className="text-lg font-bold text-white">5-Year Degradation Analysis</h3>
                             </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-xs font-mono text-slate-500 mb-1">ROOT_CAUSE://DIAGNOSIS</p>
-                                    <p className="text-slate-300 leading-relaxed text-sm bg-slate-950/50 p-4 rounded-lg border border-slate-800/50">
-                                        <span className="text-orange-400 font-mono text-xs block mb-2">[MATERIAL_ANALYSIS]</span>
-                                        {data.root_cause || "Thermal elasticity breakdown in nitrile seals under sustained load >45°C."}
-                                    </p>
+                            <div className="flex items-center gap-4 text-xs font-bold text-slate-500 uppercase">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-cyan-500"></span> MTBF
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-red-500"></span> Failures
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* ACTION CENTER - ECO APPROVAL */}
-                    <div className="flex-1 bg-gradient-to-r from-yellow-900/10 to-transparent border border-yellow-600/30 rounded-2xl p-6 md:p-8 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
-
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-                            <div>
-                                <h3 className="text-yellow-500 font-bold mb-2 flex items-center gap-2">
-                                    <Shield size={18} />
-                                    AI RECOMMENDED ACTION
-                                </h3>
-                                <p className="text-xl md:text-2xl text-white font-bold max-w-xl leading-tight">
-                                    {data.recommendation}
-                                </p>
-                                <p className="text-slate-400 text-xs mt-3 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>
-                                    Implementation ready for Production Line B
-                                </p>
-                            </div>
-
-                            <button className="whitespace-nowrap bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-4 px-8 rounded-lg shadow-[0_0_20px_rgba(234,179,8,0.2)] hover:shadow-[0_0_30px_rgba(234,179,8,0.4)] transition-all transform hover:-translate-y-0.5 flex items-center gap-3">
-                                <CheckCircle size={20} className="text-black" />
-                                APPROVE ECO #9921
-                            </button>
+                        <div className="flex-1 w-full h-full min-h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={historicalData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorFailure" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                                            <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                    <XAxis
+                                        dataKey="year"
+                                        stroke="#64748b"
+                                        tick={{ fontSize: 12, fontWeight: 'bold' }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        stroke="#64748b"
+                                        tick={{ fontSize: 12 }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dx={-10}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: '#FFFFFF', opacity: 0.05 }}
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '12px' }}
+                                    />
+                                    <Bar dataKey="failures" radius={[4, 4, 0, 0]} barSize={40} fill="url(#colorFailure)">
+                                        {historicalData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index === historicalData.length - 1 ? '#ef4444' : '#3b82f6'} fillOpacity={index === historicalData.length - 1 ? 1 : 0.3} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
-                    </div>
 
+                        <div className="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 font-mono text-center">
+                            Analysis indicates exponential degradation in polymer seals post-2023 due to thermal cycling.
+                        </div>
+                    </GlassCard>
                 </div>
             </div>
+
+            {/* Bottom Row: Detailed Technical Report (Full Width) */}
+            <GlassCard className="bg-slate-900/80 backdrop-blur-md">
+                <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <FileText size={16} className="text-cyan-400" />
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Root Cause Analysis</h4>
+                        </div>
+                        <div className="text-slate-300 leading-relaxed text-sm bg-slate-950/50 p-6 rounded-xl border border-slate-800/50 relative overflow-hidden group">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500/50 group-hover:h-full transition-all"></div>
+                            {data.root_cause || "Thermal elasticity breakdown in nitrile seals under sustained load >45°C. The material composition shows accelerated aging correlated with high-RPM usage."}
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp size={16} className="text-emerald-400" />
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Predictive Recommendation</h4>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            <div className="text-white text-lg font-bold">
+                                {data.recommendation}
+                            </div>
+                            <div className="flex gap-4">
+                                <NeonButton variant="primary" className="flex-1" icon={Zap}>
+                                    Initiate Replacement Loop
+                                </NeonButton>
+                                <NeonButton variant="outline" className="flex-1" icon={FileText}>
+                                    Download Full Spec
+                                </NeonButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </GlassCard>
         </div>
     );
 }
