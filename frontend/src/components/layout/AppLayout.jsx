@@ -4,11 +4,12 @@ import { LayoutGrid, BarChart3, AlertTriangle, Settings, LogOut, Cpu } from 'luc
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
+import { vehicles } from '../../data/mockData';
 
 const navItems = [
     { path: '/dashboard', icon: LayoutGrid, label: 'Fleet' },
     { path: '/insights', icon: BarChart3, label: 'Insights' },
-    { path: '/alerts', icon: AlertTriangle, label: 'Alerts', badge: 3 },
+    { path: '/alerts', icon: AlertTriangle, label: 'Alerts', badge: vehicles.filter(v => v.status === 'CRITICAL').length },
     { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -28,7 +29,7 @@ export default function AppLayout({ children }) {
                         <Cpu size={24} className="text-white" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight">Kritagya</h1>
+                        <h1 className="text-xl font-bold tracking-tight">AutoCare.ai</h1>
                         <p className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase">Intelligent Systems</p>
                     </div>
                 </div>

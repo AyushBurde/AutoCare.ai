@@ -8,7 +8,7 @@ import random
 from datetime import datetime, timedelta
 
 # 1. Initialize API
-app = FastAPI(title="Kritagya Backend API")
+app = FastAPI(title="AutoCare.ai Backend API")
 
 # 2. Enable CORS (Allows Daksh's React App to talk to this)
 app.add_middleware(
@@ -42,7 +42,7 @@ class TelematicsInput(BaseModel):
 
 @app.get("/")
 def home():
-    return {"status": "Online", "message": "Kritagya API is running on Localhost"}
+    return {"status": "Online", "message": "AutoCare.ai API is running on Localhost"}
 
 @app.post("/predict")
 def predict_failure(data: TelematicsInput):

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import FleetDashboard from './pages/FleetDashboard';
 import VehicleDetail from './pages/VehicleDetail';
 import Insights from './pages/Insights';
+import Alerts from './pages/Alerts';
 import AppLayout from './components/layout/AppLayout';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
                         <Route path="/dashboard" element={<FleetDashboard />} />
                         <Route path="/vehicle/:id" element={<VehicleDetail />} />
                         <Route path="/insights" element={<Insights />} />
+                        <Route path="/alerts" element={<Alerts />} />
                     </Routes>
                 </AppLayout>
             </div>
