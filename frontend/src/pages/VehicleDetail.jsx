@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { vehicles } from '../data/mockData';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Activity, Thermometer, Droplets, Gauge, AlertTriangle, Phone, ArrowLeft, Cpu, Calendar, Clock, MapPin, CheckCircle, Wrench, ChevronRight, PenTool } from 'lucide-react';
-import { predictFailure, getScheduleSlots, bookAppointment } from '../services/api';
+import { predictFailure, analyzeFailure, getScheduleSlots, bookAppointment } from '../services/api';
 import vapi from '../services/vapi';
 import GlassCard from '../components/ui/GlassCard';
 import NeonButton from '../components/ui/NeonButton';
+import DiagnosticConsole from '../components/DiagnosticConsole';
+import AIDiagnosis from '../components/AIDiagnosis';
+import SensorPanel from '../components/SensorPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const sensorData = [
@@ -33,14 +37,20 @@ export default function VehicleDetail() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Get vehicle status from navigation state or default to HEALTHY
-    const vehicleStatus = location.state?.vehicle?.status || 'HEALTHY';
+    // Get vehicle status from navigation state OR lookup in mockData
+    // This fixes the issue where reloading the page loses the "CRITICAL" status
+    const vehicleStatus = location.state?.vehicle?.status ||
+        vehicles.find(v => v.id === id)?.status ||
+        'HEALTHY';
+
     const isCritical = vehicleStatus === 'CRITICAL';
     const isMaintenance = vehicleStatus === 'MAINTENANCE';
     const isHealthy = vehicleStatus === 'HEALTHY';
 
     const [analyzing, setAnalyzing] = useState(false);
+    const [isAiLoading, setIsAiLoading] = useState(false);
     const [prediction, setPrediction] = useState(null);
+    const [aiReport, setAiReport] = useState(null);
     const [callStatus, setCallStatus] = useState('idle');
 
     // Booking State
@@ -58,8 +68,11 @@ export default function VehicleDetail() {
                 component: 'System',
                 recommendation: 'No actions required.'
             });
+        } else {
+            // Force reset prediction for critical/maintenance so button shows
+            setPrediction(null);
         }
-    }, [isHealthy]);
+    }, [isHealthy, id]);
 
     const handleAnalysis = async () => {
         setAnalyzing(true);
@@ -78,8 +91,35 @@ export default function VehicleDetail() {
                     "engine_temp_c": 105.5, "oil_pressure_psi": 25.0, "vibration_hz": 45.0,
                     "rpm": 2200, "temp_ma_3h": 104.0, "pressure_ma_3h": 26.0, "vib_ma_3h": 44.0
                 };
+                // 1. Get Prediction
                 const result = await predictFailure(dummyData);
+                console.log("Prediction Result:", result); // DEBUG
                 setPrediction(result);
+
+                // 2. Get AI Diagnosis (Chained)
+                if (result && result.is_failure_predicted) {
+                    console.log("Starting AI Analysis..."); // DEBUG
+                    try {
+                        const analysisInput = {
+                            "engine_temp_c": dummyData.engine_temp_c,
+                            "oil_pressure_psi": dummyData.oil_pressure_psi,
+                            "vibration_hz": dummyData.vibration_hz,
+                            "component_name": result.component || "Cooling Pump" // Fallback or use result component
+                        };
+                        const analysisResult = await analyzeFailure(analysisInput);
+                        console.log("AI Analysis Result:", analysisResult); // DEBUG
+                        if (analysisResult.ai_analysis) {
+                            setAiReport(analysisResult.ai_analysis);
+                        }
+                    } catch (aiError) {
+                        console.error("AI Analysis Failed:", aiError);
+                        alert("AI Error: " + aiError.message); // DEBUG
+                    } finally {
+                        setIsAiLoading(false);
+                    }
+                } else {
+                    console.log("No Failure Predicted, skipping AI"); // DEBUG
+                }
             }
         } catch (err) {
             console.error("Analysis Error:", err);
@@ -178,6 +218,8 @@ export default function VehicleDetail() {
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-2xl font-bold tracking-tight">{id}</h1>
+                            {/* DEBUG INFO */}
+                            <span className="text-[10px] bg-red-900 text-white px-1">ST: {vehicleStatus}</span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">HONDA CITY '22</span>
                         </div>
                         <p className="text-slate-400 text-xs">Connected • Live Telemetry Active</p>
@@ -198,7 +240,10 @@ export default function VehicleDetail() {
                         <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10 bg-gradient-to-b from-slate-900/80 to-transparent">
                             <div className="flex items-center gap-2">
                                 <Thermometer className={isCritical ? "text-cyan-400" : isMaintenance ? "text-yellow-400" : "text-emerald-400"} size={18} />
-                                <h3 className="font-bold text-slate-200">Thermal Analysis</h3>
+                                <div>
+                                    <h3 className="font-bold text-slate-200">Thermal Analysis</h3>
+                                    {!isHealthy && <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">⚠ Target: Cooling Pump</p>}
+                                </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-cyan-500' : isMaintenance ? 'bg-yellow-500' : 'bg-emerald-500'} animate-pulse`}></div>
@@ -228,72 +273,8 @@ export default function VehicleDetail() {
                         </div>
                     </GlassCard>
 
-                    {/* Sensor Strip */}
-                    <div className="grid grid-cols-3 gap-4 h-28 shrink-0">
-                        {isMaintenance ? (
-                            <GlassCard className="col-span-3 flex flex-row items-center justify-between !bg-yellow-500/5 !border-yellow-500/20" hoverEffect={false}>
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-yellow-500/20 rounded-lg text-yellow-500">
-                                        <Wrench size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-yellow-500 font-bold">Maintenance in Progress</h3>
-                                        <p className="text-slate-400 text-xs">Vehicle is currently being serviced.</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-xs text-slate-500 uppercase font-bold">Est. Completion</div>
-                                    <div className="text-xl font-mono text-white">Today, 5:00 PM</div>
-                                </div>
-                            </GlassCard>
-                        ) : (
-                            <>
-                                <GlassCard className="flex flex-col justify-between" hoverEffect={true}>
-                                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                                        <Droplets size={14} /> Oil Pressure
-                                    </div>
-                                    <div>
-                                        <span className="text-3xl font-mono font-bold text-white">
-                                            {isHealthy ? "32.0" : "25.0"}
-                                        </span>
-                                        <span className="text-xs text-slate-500 ml-1">PSI</span>
-                                    </div>
-                                    <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                                        <div className={`h-full ${isHealthy ? 'bg-emerald-500' : 'bg-cyan-500'} w-[${isHealthy ? '80%' : '60%'}]`}></div>
-                                    </div>
-                                </GlassCard>
-
-                                <GlassCard className="flex flex-col justify-between" hoverEffect={true}>
-                                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                                        <Gauge size={14} /> RPM
-                                    </div>
-                                    <div>
-                                        <span className="text-3xl font-mono font-bold text-white">
-                                            {isHealthy ? "1,800" : "2,200"}
-                                        </span>
-                                    </div>
-                                    <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                                        <div className={`h-full ${isHealthy ? 'bg-emerald-500' : 'bg-emerald-500'} w-[40%]`}></div>
-                                    </div>
-                                </GlassCard>
-
-                                <GlassCard className={`flex flex-col justify-between group ${isHealthy ? '' : '!border-yellow-500/20 !bg-yellow-500/5'}`} hoverEffect={true}>
-                                    <div className={`flex items-center gap-2 ${isHealthy ? 'text-slate-400' : 'text-yellow-500/80'} text-xs font-bold uppercase tracking-wider`}>
-                                        <Activity size={14} /> Vibration
-                                    </div>
-                                    <div>
-                                        <span className={`text-3xl font-mono font-bold ${isHealthy ? 'text-white' : 'text-yellow-500 group-hover:text-yellow-400'} transition-colors`}>
-                                            {isHealthy ? "12" : "45"}
-                                        </span>
-                                        <span className={`text-xs ${isHealthy ? 'text-slate-500' : 'text-yellow-500/60'} ml-1`}>Hz</span>
-                                    </div>
-                                    <div className={`h-1 ${isHealthy ? 'bg-slate-800' : 'bg-yellow-900/30'} rounded-full overflow-hidden`}>
-                                        <div className={`h-full ${isHealthy ? 'bg-emerald-500 w-[15%]' : 'bg-yellow-500 w-[85%] animate-pulse'}`}></div>
-                                    </div>
-                                </GlassCard>
-                            </>
-                        )}
-                    </div>
+                    {/* Replace Sensor Strip with AI Diagnosis (Left Side) */}
+                    <AIDiagnosis aiData={aiReport} loading={isAiLoading} />
                 </div>
 
                 {/* Right Column: AI Console (5 Cols) */}
@@ -343,6 +324,12 @@ export default function VehicleDetail() {
                                         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                                         className="space-y-6"
                                     >
+                                        {/* Digital Twin Visualization */}
+                                        <DiagnosticConsole criticalComponent={isHealthy ? null : prediction.component} />
+
+                                        {/* Sensor Strip (Moved to Right Side) */}
+                                        <SensorPanel isMaintenance={isMaintenance} isHealthy={isHealthy} />
+
                                         {/* Result Card */}
                                         <div className={`bg-slate-900/50 rounded-2xl p-6 border flex items-center justify-between ${isHealthy ? 'border-emerald-500/30' : 'border-slate-800'}`}>
                                             <div>

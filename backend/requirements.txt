@@ -4,3 +4,5 @@ pandas
 scikit-learn
 pydantic
 numpy
+google-generativeai
+python-multipart

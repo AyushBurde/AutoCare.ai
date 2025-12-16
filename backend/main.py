@@ -5,7 +5,12 @@ import pickle
 import pandas as pd
 import uvicorn
 import random
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
+
+load_dotenv()
 
 # 1. Initialize API
 app = FastAPI(title="AutoCare.ai Backend API")
@@ -178,13 +183,23 @@ def get_available_slots():
     # Format the date nicely (e.g., "Saturday, 14 Dec")
     date_format = "%A, %d %b"
     
+    # Simulated "Nearest Center" Logic
+    centers = [
+        {"name": "Hero MotoCorp Authorized Hub - Malad", "dist": "1.2 km"},
+        {"name": "Fortpoint Hero - Mahim", "dist": "3.5 km"},
+        {"name": "Automotive Hero - Andheri East", "dist": "2.1 km"},
+        {"name": "Vihaan Hero - Thane West", "dist": "5.8 km"}
+    ]
+    # Pick a random one to simulate "location detection" for different users/sessions
+    selected_center = random.choice(centers)
+
     # We return a structured response simulating the DMS reply
     return {
         "status": "success",
         "recommended_center": {
-            "name": "Hero MotoCorp Authorized Hub - Malad",
-            "type": "OFFICIAL_DEALER", # Shows we prioritize official centers
-            "distance": "2.4 km"
+            "name": selected_center["name"],
+            "type": "OFFICIAL_DEALER",
+            "distance": selected_center["dist"]
         },
         "technician_available": "Rajesh (Certified Expert)",
         "available_slots": [
@@ -215,6 +230,43 @@ def book_appointment(booking: BookingRequest):
         "center": "Hero MotoCorp Malad",
         "instructions": "Please bring your RC Book and Insurance copy."
     }
+
+# --- STANDOUT FEATURE 1: GenAI Mechanic ---
+# Configure your API key here
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+class AnalysisInput(BaseModel):
+    engine_temp_c: float
+    oil_pressure_psi: float
+    vibration_hz: float
+    component_name: str
+
+@app.post("/analyze_failure")
+def ai_mechanic_analysis(data: AnalysisInput):
+    # This is the Prompt Engineering part
+    prompt = f"""
+    You are a Senior Vehicle Technician at Hero MotoCorp.
+    A car has a critical failure in the {data.component_name}.
+    
+    Sensor Data:
+    - Temperature: {data.engine_temp_c}°C (Normal is 85-90)
+    - Pressure: {data.oil_pressure_psi} PSI (Normal is 35-40)
+    - Vibration: {data.vibration_hz} Hz (Normal is <20)
+    
+    Generate a JSON response with exactly these 3 keys:
+    1. "root_cause": A technical explanation of WHY it failed (physics based).
+    2. "customer_explanation": A simple 1-sentence explanation for a non-technical driver.
+    3. "estimated_cost": A realistic repair cost in INR.
+    """
+    
+    try:
+        # Trying gemini-2.5-flash as it appeared in the list_models output
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(prompt)
+        return {"ai_analysis": response.text}
+    except Exception as e:
+        return {"error": str(e), "message": "AI Brain is currently offline."}
+
 # Run Server (Standard Python way)
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

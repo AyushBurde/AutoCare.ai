@@ -47,4 +47,14 @@ export const bookAppointment = async (bookingData) => {
     }
 };
 
+export const analyzeFailure = async (data) => {
+    try {
+        const response = await api.post('/analyze_failure', data);
+        return response.data;
+    } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+    }
+};
+
 export default api;
