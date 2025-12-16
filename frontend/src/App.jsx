@@ -3,6 +3,7 @@ import FleetDashboard from './pages/FleetDashboard';
 import VehicleDetail from './pages/VehicleDetail';
 import Insights from './pages/Insights';
 import Alerts from './pages/Alerts';
+import AgentSecurityConsole from './components/AgentSecurityConsole';
 import AppLayout from './components/layout/AppLayout';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                         <Route path="/vehicle/:id" element={<VehicleDetail />} />
                         <Route path="/insights" element={<Insights />} />
                         <Route path="/alerts" element={<Alerts />} />
+                        <Route path="/security" element={<AgentSecurityConsole />} />
                     </Routes>
                 </AppLayout>
             </div>

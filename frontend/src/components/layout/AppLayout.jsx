@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutGrid, BarChart3, AlertTriangle, Settings, LogOut, Cpu } from 'lucide-react';
+import { LayoutGrid, BarChart3, AlertTriangle, Settings, LogOut, Cpu, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
@@ -11,6 +11,7 @@ const navItems = [
     { path: '/insights', icon: BarChart3, label: 'Insights' },
     { path: '/alerts', icon: AlertTriangle, label: 'Alerts', badge: vehicles.filter(v => v.status === 'CRITICAL').length },
     { path: '/settings', icon: Settings, label: 'Settings' },
+    { path: '/security', icon: ShieldCheck, label: 'Security' },
 ];
 
 export default function AppLayout({ children }) {
