@@ -4,6 +4,7 @@ import VehicleDetail from './pages/VehicleDetail';
 import Insights from './pages/Insights';
 import Alerts from './pages/Alerts';
 import AgentSecurityConsole from './components/AgentSecurityConsole';
+import WireframePage from './pages/WireframePage';
 import AppLayout from './components/layout/AppLayout';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                         <Route path="/insights" element={<Insights />} />
                         <Route path="/alerts" element={<Alerts />} />
                         <Route path="/security" element={<AgentSecurityConsole />} />
+                        <Route path="/wireframe" element={<WireframePage />} />
                     </Routes>
                 </AppLayout>
             </div>
