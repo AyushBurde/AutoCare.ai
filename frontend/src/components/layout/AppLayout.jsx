@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { vehicles } from '../../data/mockData';
+import logo from '../../assets/logo.jpg';
 
 const navItems = [
     { path: '/dashboard', icon: LayoutGrid, label: 'Fleet' },
@@ -25,13 +26,13 @@ export default function AppLayout({ children }) {
                 animate={{ x: 0, opacity: 1 }}
                 className="w-64 glass-card rounded-2xl flex flex-col p-4 shrink-0"
             >
-                <div className="flex items-center gap-3 px-2 mb-8 mt-2">
-                    <div className="p-2 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20">
-                        <Cpu size={24} className="text-white" />
+                <div className="flex flex-col items-center gap-2 px-2 mb-8 mt-2">
+                    <div className="w-full aspect-square relative rounded-2xl overflow-hidden shadow-2xl shadow-cyan-500/20 ring-1 ring-white/10 group-hover:shadow-cyan-500/40 transition-shadow duration-500">
+                        <img src={logo} alt="AutoCare Logo" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
-                    <div>
-                        <h1 className="text-xl font-bold tracking-tight">AutoCare.ai</h1>
-                        <p className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase">Intelligent Systems</p>
+                    <div className="text-center">
+                        <p className="text-sm text-cyan-400 font-mono tracking-[0.2em] uppercase font-bold">Intelligent Systems</p>
                     </div>
                 </div>
 

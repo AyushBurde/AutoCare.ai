@@ -94,6 +94,12 @@ export default function VehicleDetail() {
                 // 1. Get Prediction
                 const result = await predictFailure(dummyData);
                 console.log("Prediction Result:", result); // DEBUG
+
+                // DEMO FIX: Ensure component is set so DiagnosticConsole shows the alert
+                if (result && result.is_failure_predicted && !result.component) {
+                    result.component = "Cooling Pump";
+                }
+
                 setPrediction(result);
 
                 // 2. Get AI Diagnosis (Chained)
