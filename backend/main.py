@@ -15,10 +15,12 @@ load_dotenv()
 # 1. Initialize API
 app = FastAPI(title="AutoCare.ai Backend API")
 
-# 2. Enable CORS (Allows Daksh's React App to talk to this)
+# 2. Enable CORS (Allows React App to talk to this)
+# In production, set ALLOWED_ORIGINS environment variable with comma-separated URLs
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, replace with specific domain
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +30,7 @@ app.add_middleware(
 try:
     with open('failure_predictor.pkl', 'rb') as f:
         model = pickle.load(f)
-    print("✅ API Startup: Model loaded successfully.")
+    print("API Startup: Model loaded successfully.")
 except FileNotFoundError:
     print("⚠️ Warning: Model file not found. Predictions will fail.")
     model = None
@@ -269,4 +271,5 @@ def ai_mechanic_analysis(data: AnalysisInput):
 
 # Run Server (Standard Python way)
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)

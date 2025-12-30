@@ -10,7 +10,7 @@ def train():
     try:
         df = pd.read_csv('synthetic_telematics_data.csv')
     except FileNotFoundError:
-        print("❌ Error: CSV not found. Run generate_data.py first!")
+        print(" Error: CSV not found. Run generate_data.py first!")
         return
 
     # 2. Feature Engineering (Moving Averages)
@@ -31,12 +31,12 @@ def train():
 
     # 5. Evaluate
     acc = accuracy_score(y_test, model.predict(X_test))
-    print(f"📊 Model Accuracy: {acc*100:.2f}%")
+    print(f"Model Accuracy: {acc*100:.2f}%")
 
     # 6. Save
     with open('failure_predictor.pkl', 'wb') as f:
         pickle.dump(model, f)
-    print("✅ Success! Model saved as 'failure_predictor.pkl'")
+    print(" Success! Model saved as 'failure_predictor.pkl'")
 
 if __name__ == "__main__":
     train()
