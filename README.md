@@ -1,6 +1,6 @@
 # 🚗 AutoCare.ai - Predictive Maintenance System
 
-**AutoCare.ai** is an intelligent vehicle fleet management platform developed by our engineering team. It leverages **Machine Learning** to predict component failures and visualizes diagnostics through an interactive **3D Holographic Dashboard**.
+**AutoCare.ai** is an intelligent vehicle fleet management platform developed by us in a hackathon. It leverages **Machine Learning** to predict component failures and visualizes diagnostics through an interactive **3D Holographic Dashboard**.
 
 ---
 
